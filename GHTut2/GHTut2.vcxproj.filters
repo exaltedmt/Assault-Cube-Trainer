@@ -13,10 +13,45 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="proc">
+      <UniqueIdentifier>{22f7d7ca-0589-46b8-920c-9b1af55e823e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="mem">
+      <UniqueIdentifier>{fb4ab1e5-003f-4474-8936-a526a70d904c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GHTut2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="proc.cpp">
+      <Filter>proc</Filter>
+    </ClCompile>
+    <ClCompile Include="mem.cpp">
+      <Filter>mem</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GHTut3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="proc.h">
+      <Filter>proc</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mem.h">
+      <Filter>mem</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
