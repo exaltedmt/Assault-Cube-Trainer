@@ -49,6 +49,8 @@ int main()
 
 			if (bAmmo)
 			{
+				// Increases ammo instead of decrease
+				// x06: inc [esi]
 				mem::PatchEx((BYTE*)(moduleBase + 0x637E9), (BYTE*)"\xFF\x06", 2, hProcess);
 
 				mem::PatchEx((BYTE*)(moduleBase + 0x637E9), (BYTE*)"\xFF\x0E", 2, hProcess);
