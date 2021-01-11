@@ -1,4 +1,4 @@
-#pragma once
+// #pragma once
 #include "stdafx.h"
 #include "mem.h"
 
@@ -57,29 +57,29 @@ DWORD WINAPI HackThread(HMODULE hModule)
 				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x3C\x53\x56\x8B\xF1\x8B\x46\x0C", 16);
 			}
 		}
-	}
 
-	//continous write/freeze
-	uintptr_t* localPlayerPtr = (uintptr_t*)(moduleBase + 0x10F4F4);
+		//continous write/freeze
+		uintptr_t* localPlayerPtr = (uintptr_t*)(moduleBase + 0x10F4F4);
 
-	if (localPlayerPtr)
-	{
-		if (bHealth)
+		if (localPlayerPtr)
 		{
-			// Dereference localPlayerPtr, offset 0xF8, cast type to int*, and finally dereference to change value.
-			*(int*)(*localPlayerPtr + 0xF8) = 1337;
-		}
+			if (bHealth)
+			{
+				// Dereference localPlayerPtr, offset 0xF8, cast type to int*, and finally dereference to change value.
+				*(int*)(*localPlayerPtr + 0xF8) = 1337;
+			}
 
-		if (bAmmo)
-		{
-			uintptr_t ammoAddr = mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 });
-			int* ammo = (int*)ammoAddr;
-			*ammo = 1337;
+			if (bAmmo)
+			{
+				uintptr_t ammoAddr = mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 });
+				int* ammo = (int*)ammoAddr;
+				*ammo = 1337;
 
-			// *(int*)mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 }) = 1337;
+				// *(int*)mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 }) = 1337;
+			}
 		}
+		Sleep(5);
 	}
-	Sleep(5);
 
 	//cleanup & eject
 	fclose(f);

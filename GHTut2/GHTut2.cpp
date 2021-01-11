@@ -1,5 +1,5 @@
 // GHTut2.cpp : Defines the entry point for the console application
-#pragma once
+// #pragma once
 #include "stdafx.h"
 #include "proc.h"
 
