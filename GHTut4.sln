@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GHTut2", "GHTut2\GHTut2.vcxproj", "{E416B426-8385-4AD6-A512-BABC4F81C22E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GHTut4", "GHTut4\GHTut4.vcxproj", "{E416B426-8385-4AD6-A512-BABC4F81C22E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +26,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {F07511CF-0B16-4A5E-8DA9-981F78971016}
+		SolutionGuid = {E2BD347C-CA12-417A-AA77-89C8173442EB}
 	EndGlobalSection
 EndGlobal

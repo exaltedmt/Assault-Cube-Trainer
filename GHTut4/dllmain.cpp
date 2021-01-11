@@ -1,4 +1,3 @@
-// #pragma once
 #include "stdafx.h"
 #include "mem.h"
 
@@ -13,6 +12,9 @@ DWORD WINAPI HackThread(HMODULE hModule)
 
 	//get module base
 	uintptr_t moduleBase = (uintptr_t)GetModuleHandle(L"ac_client.exe");
+
+	//NULL still grabs from .exe
+	//moduleBase = (uintptr_t)GetModuleHandle(NULL);
 
 	bool bHealth = false, bAmmo = false, bRecoil = false;
 
@@ -65,12 +67,18 @@ DWORD WINAPI HackThread(HMODULE hModule)
 		{
 			if (bHealth)
 			{
-				// Dereference localPlayerPtr, offset 0xF8, cast type to int*, and finally dereference to change value.
+				//*localPlayerPtr = derference the pointer, to get the localPlayerAddr
+				// add 0xF8 to get health address
+				//cast to an int pointer, this pointer now points to the health address
+				//derference it and assign the value 1337 to the health variable it points to
 				*(int*)(*localPlayerPtr + 0xF8) = 1337;
 			}
 
 			if (bAmmo)
 			{
+				//We aren't external now, we can now efficiently calculate all pointers dynamically
+				//before we only resolved pointers when needed for efficiency reasons
+				//we are executing internally, we can calculate everything when needed
 				uintptr_t ammoAddr = mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 });
 				int* ammo = (int*)ammoAddr;
 				*ammo = 1337;

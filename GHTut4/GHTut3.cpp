@@ -1,4 +1,3 @@
-// #pragma once
 #include "stdafx.h"
 #include "proc.h"
 #include "mem.h"
