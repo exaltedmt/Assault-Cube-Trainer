@@ -3,10 +3,10 @@
 
 void mem::Patch(BYTE* dst, BYTE* src, unsigned int size)
 {
-	DWORD oldprotect;
-	VirtualProtect(dst, size, PAGE_EXECUTE_READWRITE, &oldprotect);
+    DWORD oldprotect;
+    VirtualProtect(dst, size, PAGE_EXECUTE_READWRITE, &oldprotect);
     memcpy(dst, src, size);
-	VirtualProtect(dst, size, oldprotect, &oldprotect);
+    VirtualProtect(dst, size, oldprotect, &oldprotect);
 }
 
 void mem::PatchEx(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess)

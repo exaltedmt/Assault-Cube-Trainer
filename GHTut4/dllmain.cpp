@@ -3,34 +3,29 @@
 
 DWORD WINAPI HackThread(HMODULE hModule)
 {
-	//Create console
+	//Create Console
 	AllocConsole();
 	FILE* f;
 	freopen_s(&f, "CONOUT$", "w", stdout);
 
-	std::cout << "OG for a fee, stay sipin' fam\n";
+	std::cout << "Injection successful! Enjoy leet hax.\n";
 
-	//get module base
 	uintptr_t moduleBase = (uintptr_t)GetModuleHandle(L"ac_client.exe");
 
-	//NULL still grabs from .exe
-	//moduleBase = (uintptr_t)GetModuleHandle(NULL);
+	//calling it with NULL also gives you the address of the .exe module
+	moduleBase = (uintptr_t)GetModuleHandle(NULL);
 
 	bool bHealth = false, bAmmo = false, bRecoil = false;
 
-	//hack loop
 	while (true)
 	{
-		//key input
 		if (GetAsyncKeyState(VK_END) & 1)
 		{
 			break;
 		}
 
 		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
-		{
 			bHealth = !bHealth;
-		}
 
 		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
 		{
@@ -43,7 +38,7 @@ DWORD WINAPI HackThread(HMODULE hModule)
 
 			if (bRecoil)
 			{
-				//nop
+				//nop recoil version
 				//mem::Nop((BYTE*)(moduleBase + 0x63786), 10);
 
 				//ret 0008 - found at the end of the recoil call.
@@ -60,13 +55,16 @@ DWORD WINAPI HackThread(HMODULE hModule)
 			}
 		}
 
-		//continous write/freeze
+		//need to use uintptr_t for pointer arithmetic later
 		uintptr_t* localPlayerPtr = (uintptr_t*)(moduleBase + 0x10F4F4);
+
+		//continuous writes / freeze
 
 		if (localPlayerPtr)
 		{
 			if (bHealth)
 			{
+
 				//*localPlayerPtr = derference the pointer, to get the localPlayerAddr
 				// add 0xF8 to get health address
 				//cast to an int pointer, this pointer now points to the health address
@@ -85,32 +83,30 @@ DWORD WINAPI HackThread(HMODULE hModule)
 
 				// *(int*)mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 }) = 1337;
 			}
+
 		}
 		Sleep(5);
 	}
 
-	//cleanup & eject
 	fclose(f);
 	FreeConsole();
 	FreeLibraryAndExitThread(hModule, 0);
 	return 0;
 }
 
-BOOL APIENTRY DllMain ( HMODULE hModule,
-					    DWORD ul_reason_for_call,
-					    LPVOID lpReserved
-					   )
+BOOL APIENTRY DllMain(HMODULE hModule,
+	DWORD  ul_reason_for_call,
+	LPVOID lpReserved
+)
 {
 	switch (ul_reason_for_call)
 	{
-		case DLL_PROCESS_ATTACH:
-		{
-			CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)HackThread, hModule, 0, nullptr));
-		}
-		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
-		case DLL_PROCESS_DETACH:
-			break;
+	case DLL_PROCESS_ATTACH:
+		CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)HackThread, hModule, 0, nullptr));
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
 	}
 	return TRUE;
 }
@@ -136,21 +132,8 @@ public:
 		//              Type     Name    Offset
 		DEFINE_MEMBER_N(int*, clipPtr, 0x0010);
 		DEFINE_MEMBER_N(int*, ammoPtr, 0x0014);
-		DEFINE_MEMBER_N(int, ammoDec, 0x001C); 
+		DEFINE_MEMBER_N(int, ammoDec, 0x001C);
 		DEFINE_MEMBER_N(int*, weaponTypePtr, 0x000C);
-	};
-
-}; //Size: 0x0044
-
-class weaponType
-{
-public:
-
-	union {
-		//              Type     Name    Offset
-		// DEFINE_MEMBER_N(int, clip, 0x0000);
-		DEFINE_MEMBER_N(int, shotsFired, 0x0010);
-		DEFINE_MEMBER_N(int, lastWepClip, 0x0014);
 	};
 
 }; //Size: 0x0044
@@ -187,7 +170,7 @@ public:
 
 	// char weaponName[16]; //0x0000
 	union {
-	//					Type     Name    Offset
+		//					Type     Name    Offset
 		DEFINE_MEMBER_N(int, magSize, 0x0118);
 		DEFINE_MEMBER_N(int, wepTypeRecoil1, 0x0120);
 		DEFINE_MEMBER_N(int, wepTypeRecoil2, 0x0122);
