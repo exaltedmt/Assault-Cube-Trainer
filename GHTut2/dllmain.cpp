@@ -1,6 +1,111 @@
+#pragma once
 #include "stdafx.h"
-#include <iostream>
-// #include "mem.h"
+#include "mem.h"
+
+DWORD WINAPI HackThread(HMODULE hModule)
+{
+	//Create console
+	AllocConsole();
+	FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+
+	std::cout << "OG for a fee, stay sipin' fam\n";
+
+	//get module base
+	uintptr_t moduleBase = (uintptr_t)GetModuleHandle(L"ac_client.exe");
+
+	bool bHealth = false, bAmmo = false, bRecoil = false;
+
+	//hack loop
+	while (true)
+	{
+		//key input
+		if (GetAsyncKeyState(VK_END) & 1)
+		{
+			break;
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+		{
+			bHealth = !bHealth;
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+		{
+			bAmmo = !bAmmo;
+		}
+
+		if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+		{
+			bRecoil = !bRecoil;
+
+			if (bRecoil)
+			{
+				//nop
+				//mem::Nop((BYTE*)(moduleBase + 0x63786), 10);
+
+				//ret 0008 - found at the end of the recoil call.
+				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\xC2\x08\x00", 3);
+			}
+
+			else
+			{
+				//write back original instructions
+				//mem::Patch((BYTE*)(moduleBase + 0x63786), (BYTE*)"\x50\x8D\x4C\x24\x1C\x51\x8B\xCE\xFF\xD2", 10);
+
+				// push ebp - original assembly - taken from CE Memory View
+				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x3C\x53\x56\x8B\xF1\x8B\x46\x0C", 16);
+			}
+		}
+	}
+
+	//continous write/freeze
+	uintptr_t* localPlayerPtr = (uintptr_t*)(moduleBase + 0x10F4F4);
+
+	if (localPlayerPtr)
+	{
+		if (bHealth)
+		{
+			// Dereference localPlayerPtr, offset 0xF8, cast type to int*, and finally dereference to change value.
+			*(int*)(*localPlayerPtr + 0xF8) = 1337;
+		}
+
+		if (bAmmo)
+		{
+			uintptr_t ammoAddr = mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 });
+			int* ammo = (int*)ammoAddr;
+			*ammo = 1337;
+
+			// *(int*)mem::FindDMAAddy(moduleBase + 0x10F4F4, { 0x374, 0x14, 0x0 }) = 1337;
+		}
+	}
+	Sleep(5);
+
+	//cleanup & eject
+	fclose(f);
+	FreeConsole();
+	FreeLibraryAndExitThread(hModule, 0);
+	return 0;
+}
+
+BOOL APIENTRY DllMain ( HMODULE hModule,
+					    DWORD ul_reason_for_call,
+					    LPVOID lpReserved
+					   )
+{
+	switch (ul_reason_for_call)
+	{
+		case DLL_PROCESS_ATTACH:
+		{
+			CloseHandle(CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)HackThread, hModule, 0, nullptr));
+		}
+		case DLL_THREAD_ATTACH:
+		case DLL_THREAD_DETACH:
+		case DLL_PROCESS_DETACH:
+			break;
+	}
+	return TRUE;
+}
 
 // Created with ReClass.NET 1.2 by KN4CK3R
 

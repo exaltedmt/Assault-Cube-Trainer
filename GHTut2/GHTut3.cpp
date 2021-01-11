@@ -1,8 +1,9 @@
+#pragma once
 #include "stdafx.h"
 #include "proc.h"
 #include "mem.h"
 
-int main()
+int test2()
 {
 	HANDLE hProcess = 0;
 
@@ -61,7 +62,7 @@ int main()
 		{
 			bRecoil = !bRecoil;
 
-			
+			// "nop" variant commented out
 			if (bRecoil)
 			{
 				// mem::NopEx((BYTE*)(moduleBase + 0x63786), 10, hProcess);
@@ -75,19 +76,8 @@ int main()
 			{
 				// mem::PatchEx((BYTE*)(moduleBase + 0x63786), (BYTE*)"\x50\x8d\x4c\x24\x1c\x51\x8b\xce\xff\xd2", 10, hProcess);
 
-				// push ebp - original assembly
+				// push ebp - original assembly - taken from CE
 				mem::PatchEx((BYTE*)(moduleBase + 0x62020), (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x3C\x53\x56\x8B\xF1\x8B\x46\x0C", 16, hProcess);
-			}
-			
-
-			// instead of noping
-			if (bRecoil)
-			{
-				
-			}
-			else
-			{
-				
 			}
 
 		}
