@@ -45,7 +45,7 @@ BYTE* mem::TrampHook32(BYTE* src, BYTE* dst, const uintptr_t len)
 {
     if (len < 5)
     {
-        return false;
+        return 0;
     }
 
     // Create Gateway
