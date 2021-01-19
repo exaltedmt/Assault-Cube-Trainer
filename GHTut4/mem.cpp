@@ -7,6 +7,7 @@ void mem::Patch(BYTE* dst, BYTE* src, unsigned int size)
     VirtualProtect(dst, size, PAGE_EXECUTE_READWRITE, &oldprotect);
     memcpy(dst, src, size);
     VirtualProtect(dst, size, oldprotect, &oldprotect);
+    
 }
 
 void mem::PatchEx(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess)
@@ -16,6 +17,88 @@ void mem::PatchEx(BYTE* dst, BYTE* src, unsigned int size, HANDLE hProcess)
     WriteProcessMemory(hProcess, dst, src, size, nullptr);
     VirtualProtectEx(hProcess, dst, size, oldprotect, &oldprotect);
 }
+
+bool mem::Detour32(BYTE* src, BYTE* dst, const uintptr_t len)
+{
+    if (len < 5)
+    {
+        return false;
+    }
+
+    DWORD oldprotect;
+    VirtualProtect(src, len, PAGE_EXECUTE_READWRITE, &oldprotect);
+
+    // were not noping like in the simple hook.
+    uintptr_t relativeAddress = dst - src - 5;
+
+    // jmp
+    *src = 0xE9;
+    *(uintptr_t*)(src + 1) = relativeAddress;
+
+    DWORD curprotect;
+    VirtualProtect(src, len, oldprotect, &curprotect);
+
+    return true;
+}
+
+BYTE* mem::TrampHook32(BYTE* src, BYTE* dst, const uintptr_t len)
+{
+    if (len < 5)
+    {
+        return false;
+    }
+
+    // Create Gateway
+    BYTE* gateway = (BYTE*)VirtualAlloc(0, len, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
+
+    // write the stolen bytes to the gateway
+    memcpy_s(gateway, len, src, len);
+
+    // Get the gateway to destination address
+    uintptr_t gatewayRelativeAddr = src - gateway - 5;
+
+    // add the jmp opcode to the end of the gateway
+    *(gateway + len) = 0xE9;
+
+    // Write the address of the gateway to the jmp
+    *(uintptr_t*)((uintptr_t)gateway + len + 1) = gatewayRelativeAddr;
+
+    // Perform the detour
+    Detour32(src, dst, len);
+
+    return gateway;
+
+}
+
+/*
+bool mem::Hook(BYTE* dst, BYTE* src, unsigned int size)
+{
+    // We check the length to be at least 5 bytes because this is the smallest relative jmp in x86. - https://guidedhacking.com/threads/c-detour-hooking-function-tutorial.7930/
+    // "Typically you are doing this to detour the code into a memory region where your own code exists. Thus you're forcing the game to execute your code."
+    if (size < 5)
+    {
+        return false;
+    }
+
+    DWORD oldprotect;
+    VirtualProtect(dst, size, PAGE_EXECUTE_READWRITE, &oldprotect);
+
+    // any stray bytes at end of jump, can cause unwanted behavior
+    // nop
+    memset(dst, 0x90, size);
+    DWORD relativeAddress = ((DWORD)src - (DWORD)dst) - 5;
+
+    // jmp
+    *(BYTE*)dst = 0xE9;
+    *(DWORD*)((DWORD)dst + 1) = relativeAddress;
+
+    DWORD curprotect;
+    VirtualProtect(dst, size, oldprotect, &curprotect);
+
+    return true;
+}
+*/
+
 
 void mem::Nop(BYTE* dst, unsigned int size)
 {
@@ -44,6 +127,7 @@ uintptr_t mem::FindDMAAddy(uintptr_t ptr, std::vector<unsigned int> offsets)
         addr += offsets[i];
     }
     return addr;
+
 }
 
 uintptr_t mem::FindDMAAddyEx(HANDLE hProc, uintptr_t ptr, std::vector<unsigned int> offsets)

@@ -119,8 +119,19 @@ public:
 	*/
 }; //Size: 0x046C
 
+// Hooking!
+typedef BOOL(__stdcall* twglSwapBuffers) (HDC hDc);
+twglSwapBuffers owglSwapBuffers;
+
+BOOL __stdcall hkwglSwapBuffers(HDC hDc)
+{
+	std::cout << "Hooked." << std::endl;
+	return owglSwapBuffers(hDc);
+}
+
 DWORD WINAPI HackThread(HMODULE hModule)
 {
+
 	//Create Console
 	AllocConsole();
 	FILE* f;
@@ -134,6 +145,9 @@ DWORD WINAPI HackThread(HMODULE hModule)
 	moduleBase = (uintptr_t)GetModuleHandle(NULL);
 
 	bool bHealth = false, bAmmo = false, bRecoil = false;
+
+	owglSwapBuffers = (twglSwapBuffers)GetProcAddress(GetModuleHandle(L"opengl32.dll"), "wglSwapBuffers");
+	owglSwapBuffers = (twglSwapBuffers)mem::TrampHook32((BYTE*)owglSwapBuffers, (BYTE*)hkwglSwapBuffers, 5);
 
 	while (true)
 	{
@@ -160,7 +174,8 @@ DWORD WINAPI HackThread(HMODULE hModule)
 				//mem::Nop((BYTE*)(moduleBase + 0x63786), 10);
 
 				//ret 0008 - found at the end of the recoil call.
-				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\xC2\x08\x00", 3);
+				//Patch now requires minimum 5 bytes for hooking.
+				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\xC2\x08\x00", 5);
 			}
 
 			else
