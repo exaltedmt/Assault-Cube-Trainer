@@ -149,6 +149,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="glDraw.h" />
+    <ClInclude Include="glText.h" />
+    <ClInclude Include="hook.h" />
     <ClInclude Include="mem.h" />
     <ClInclude Include="proc.h" />
     <ClInclude Include="stdafx.h" />
@@ -158,6 +161,9 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="GHTut2.cpp" />
     <ClCompile Include="GHTut3.cpp" />
+    <ClCompile Include="glDraw.cpp" />
+    <ClCompile Include="glText.cpp" />
+    <ClCompile Include="hook.cpp" />
     <ClCompile Include="mem.cpp" />
     <ClCompile Include="proc.cpp" />
     <ClCompile Include="stdafx.cpp">

@@ -19,6 +19,15 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="hook">
+      <UniqueIdentifier>{9c35b637-6494-4cf9-88c3-3a5b8b05fade}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL Text">
+      <UniqueIdentifier>{caa825bc-750b-4d16-ad7c-5446c015dded}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="OpenGL Draw">
+      <UniqueIdentifier>{6050461f-a754-479f-a8f9-0d77a826575e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="proc.cpp">
@@ -39,6 +48,15 @@
     <ClCompile Include="GHTut3.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hook.cpp">
+      <Filter>hook</Filter>
+    </ClCompile>
+    <ClCompile Include="glText.cpp">
+      <Filter>OpenGL Text</Filter>
+    </ClCompile>
+    <ClCompile Include="glDraw.cpp">
+      <Filter>OpenGL Draw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -52,6 +70,15 @@
     </ClInclude>
     <ClInclude Include="mem.h">
       <Filter>mem</Filter>
+    </ClInclude>
+    <ClInclude Include="hook.h">
+      <Filter>hook</Filter>
+    </ClInclude>
+    <ClInclude Include="glText.h">
+      <Filter>OpenGL Text</Filter>
+    </ClInclude>
+    <ClInclude Include="glDraw.h">
+      <Filter>OpenGL Draw</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

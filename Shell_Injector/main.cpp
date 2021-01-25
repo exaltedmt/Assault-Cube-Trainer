@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "StartRoutine.h"
 
 #define DLL_PATH_X86 TEXT("C:\\Users\\virul\\Documents\\Projects\\Memory_Editing\\GHTut4\\Debug\\GHTut4.dll")
@@ -105,7 +106,7 @@ bool InjectDll(const TCHAR* szProcess, const TCHAR* szPath, LAUNCH_METHOD Method
 
 	if (Method != LM_QueueUserAPC)
 	{
-		VirtualAllocEx(hProc, pArg, 0, MEM_RELEASE);
+		VirtualFreeEx(hProc, pArg, 0, MEM_RELEASE);
 	}
 
 	CloseHandle(hProc);

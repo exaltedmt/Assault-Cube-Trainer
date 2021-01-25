@@ -22,6 +22,7 @@ public:
 	// We are pointing to a value, so change to int*
 	union {
 		//              Type     Name    Offset
+		DEFINE_MEMBER_N(int, ID, 0x0004);
 		DEFINE_MEMBER_N(int*, clipPtr, 0x0010);
 		DEFINE_MEMBER_N(int*, ammoPtr, 0x0014);
 		DEFINE_MEMBER_N(int, ammoDec, 0x001C);
@@ -84,6 +85,7 @@ public:
 
 	union {
 		//              Type     Name    Offset
+		DEFINE_MEMBER_0(DWORD, vTable, 0x0);
 		DEFINE_MEMBER_N(Vector3, poshead, 0x4);
 		DEFINE_MEMBER_N(Vector3, pos, 0x0034);
 		DEFINE_MEMBER_N(Vector3, angle, 0x0040);
@@ -119,74 +121,79 @@ public:
 	*/
 }; //Size: 0x046C
 
-// Hooking!
+// Getting players on the map
+struct EntList
+{
+	//Like changing data type in "dissect structures" from whatever to Pointer to ent.
+	//Reveals other players on the map.
+	ent* ents[31];
+};
+
+bool IsValidEnt(ent* ent)
+{
+	if (ent)
+	{
+		if (ent->vTable == 0x4E4A98 || ent->vTable == 0x4E4AC0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+int* numOfPlayers = (int*)(0x50F500);
+ent* localPlayer = *(ent**)0x50F4F4;
+EntList* entList = *(EntList**)0x50F4F8;
+
+// Hooking! - Variables once in HackThread(), are now in open namespace.
+uintptr_t moduleBase = (uintptr_t)GetModuleHandle(L"ac_client.exe");
+
+bool bHealth = false, bAmmo = false, bRecoil = false;
+
 typedef BOOL(__stdcall* twglSwapBuffers) (HDC hDc);
 twglSwapBuffers owglSwapBuffers;
 
+// Where we execute our code.
 BOOL __stdcall hkwglSwapBuffers(HDC hDc)
 {
 	std::cout << "Hooked." << std::endl;
-	return owglSwapBuffers(hDc);
-}
-
-DWORD WINAPI HackThread(HMODULE hModule)
-{
-
-	//Create Console
-	AllocConsole();
-	FILE* f;
-	freopen_s(&f, "CONOUT$", "w", stdout);
-
-	std::cout << "Injection successful! Enjoy leet hax.\n";
-
-	uintptr_t moduleBase = (uintptr_t)GetModuleHandle(L"ac_client.exe");
-
-	//calling it with NULL also gives you the address of the .exe module
-	moduleBase = (uintptr_t)GetModuleHandle(NULL);
-
-	bool bHealth = false, bAmmo = false, bRecoil = false;
-
-	owglSwapBuffers = (twglSwapBuffers)GetProcAddress(GetModuleHandle(L"opengl32.dll"), "wglSwapBuffers");
-	owglSwapBuffers = (twglSwapBuffers)mem::TrampHook32((BYTE*)owglSwapBuffers, (BYTE*)hkwglSwapBuffers, 5);
-
-	while (true)
+	// No longer needed as a loop in HackThread().
+	// Will instead become DeHook function.
+	if (GetAsyncKeyState(VK_END) & 1)
 	{
-		if (GetAsyncKeyState(VK_END) & 1)
+		//break;
+	}
+
+	if (GetAsyncKeyState(VK_NUMPAD1) & 1)
+		bHealth = !bHealth;
+
+	if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+	{
+		bAmmo = !bAmmo;
+	}
+
+	if (GetAsyncKeyState(VK_NUMPAD3) & 1)
+	{
+		bRecoil = !bRecoil;
+
+		if (bRecoil)
 		{
-			break;
+			//no recoil nop version
+			//mem::Nop((BYTE*)(moduleBase + 0x63786), 10);
+
+			//ret 0008 - found at the end of the recoil call.
+			mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\xC2\x08\x00", 3);
 		}
 
-		if (GetAsyncKeyState(VK_NUMPAD1) & 1)
-			bHealth = !bHealth;
-
-		if (GetAsyncKeyState(VK_NUMPAD2) & 1)
+		else
 		{
-			bAmmo = !bAmmo;
+			//write back original instructions
+			//mem::Patch((BYTE*)(moduleBase + 0x63786), (BYTE*)"\x50\x8D\x4C\x24\x1C\x51\x8B\xCE\xFF\xD2", 10);
+
+			// push ebp - original assembly - taken from CE Memory View
+			mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x3C\x53\x56\x8B\xF1\x8B\x46\x0C", 16);
 		}
 
-		if (GetAsyncKeyState(VK_NUMPAD3) & 1)
-		{
-			bRecoil = !bRecoil;
-
-			if (bRecoil)
-			{
-				//nop recoil version
-				//mem::Nop((BYTE*)(moduleBase + 0x63786), 10);
-
-				//ret 0008 - found at the end of the recoil call.
-				//Patch now requires minimum 5 bytes for hooking.
-				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\xC2\x08\x00", 5);
-			}
-
-			else
-			{
-				//write back original instructions
-				//mem::Patch((BYTE*)(moduleBase + 0x63786), (BYTE*)"\x50\x8D\x4C\x24\x1C\x51\x8B\xCE\xFF\xD2", 10);
-
-				// push ebp - original assembly - taken from CE Memory View
-				mem::Patch((BYTE*)(moduleBase + 0x62020), (BYTE*)"\x55\x8B\xEC\x83\xE4\xF8\x83\xEC\x3C\x53\x56\x8B\xF1\x8B\x46\x0C", 16);
-			}
-		}
 
 		//need to use uintptr_t for pointer arithmetic later
 		// uintptr_t* localPlayerPtr = (uintptr_t*)(moduleBase + 0x10F4F4);
@@ -222,12 +229,27 @@ DWORD WINAPI HackThread(HMODULE hModule)
 
 				// LPP points to two classes, so we dereference it firstly
 				// No need to explicitly call ammo variable, since 0x0.
-				*localPlayerPtr->currWeapon->ammoPtr = 1337;
+				* localPlayerPtr->currWeapon->ammoPtr = 1337;
 			}
 
 		}
-		Sleep(5);
 	}
+
+	return owglSwapBuffers(hDc);
+}
+
+DWORD WINAPI HackThread(HMODULE hModule)
+{
+
+	//Create Console
+	AllocConsole();
+	FILE* f;
+	freopen_s(&f, "CONOUT$", "w", stdout);
+
+	std::cout << "Injection successful! Enjoy leet hax.\n";
+
+	owglSwapBuffers = (twglSwapBuffers)GetProcAddress(GetModuleHandle(L"opengl32.dll"), "wglSwapBuffers");
+	owglSwapBuffers = (twglSwapBuffers)mem::TrampHook32((BYTE*)owglSwapBuffers, (BYTE*)hkwglSwapBuffers, 5);
 
 	fclose(f);
 	FreeConsole();

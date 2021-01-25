@@ -39,7 +39,7 @@ HINSTANCE GetModuleHandleEx(HANDLE hTargetProc, const TCHAR* lpModuleName)
 		return NULL;
 	}
 
-	ME32.hModule;
+	return ME32.hModule;
 }
 
 void* GetProcAddressEx(HANDLE hTargetProc, const TCHAR* lpModuleName, const char* lpProcName)
